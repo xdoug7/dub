@@ -21,19 +21,22 @@ export default async function Stats() {
     },
   )();
 
-  const clicks = await fetch(
-    `https://api.us-east.tinybird.co/v0/pipes/all_clicks.json`,
-    {
-      headers: {
-        Authorization: `Bearer ${process.env.TINYBIRD_API_KEY}`,
-      },
-      next: {
-        revalidate: 300,
-      },
+  const clicks = await fetch(`https://api.us-east.tinybird.co/v0/pipes/all_clicks.json`, {
+    headers: {
+      Authorization: `Bearer ${process.env.TINYBIRD_API_KEY}`
     },
-  )
-    .then((res) => res.json())
-    .then((res) => res.data[0]["count(timestamp)"]);
+    next: {
+      revalidate: 300
+    }
+  }).then((res) => res.json())
+    .then((res) => {
+      if (res.data && res.data[0]) {
+        return res.data[0]["count(timestamp)"]
+      } else {
+        console.log('Unexpected response:', res);
+        return null;  // or some other default value
+      }
+    });
 
   return (
     <div className="border-y border-gray-200 bg-white/10 py-8 shadow-[inset_10px_-50px_94px_0_rgb(199,199,199,0.2)] backdrop-blur">
